@@ -1,0 +1,29 @@
+server:
+  port: 9000
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/springjwt
+    username: postgres
+    password: useruser08
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        "[current_session_context_class]": org.springframework.orm.hibernate5.SpringSessionContext
+        "[show_sql]": true
+        "[format_sql]": true
+        "[hbm2ddl.auto]": create-drop
+
+
+logging:
+  level:
+    root: INFO
+    "[org.springframework.web]": DEBUG
+    "[org.springframework.security]": INFO
+
+jwt:
+  private.key: classpath:app.key
+  public.key: classpath:app.pub
+  access.token.expiry: 1
+  refresh.token.expiry: 365
