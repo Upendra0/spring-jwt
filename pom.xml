@@ -10,7 +10,7 @@
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.example</groupId>
-	<artifactId>LoveCaluclator</artifactId>
+	<artifactId>SpringJwt</artifactId>
 	<version>1.0</version>
 	<name>SpringJwt</name>
 	<description>Implementing Spring jwt Login</description>
@@ -75,7 +75,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>com.upendra.SpringJwtApplication</mainClass>
+					<mainClass>com.upendra.Main</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>

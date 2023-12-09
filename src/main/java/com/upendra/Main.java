@@ -8,10 +8,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @SpringBootApplication
 @EnableMethodSecurity
 @EnableTransactionManagement
-public class SpringJwtApplication {
+public class Main {
 
 	public static void main(String[] args) {
-		SpringApplication.run(SpringJwtApplication.class, args);
+		SpringApplication.run(Main.class, args);
 	}
 
 }

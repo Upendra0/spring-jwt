@@ -1,8 +1,8 @@
 package com.upendra.controller;
 
-import com.upendra.dto.AuthRequest;
+import com.upendra.dto.AuthRequestDTO;
 import com.upendra.response.AuthResponse;
-import com.upendra.dto.RefreshTokenRequest;
+import com.upendra.dto.RefreshTokenRequestDTO;
 import com.upendra.model.RefreshToken;
 import com.upendra.response.ResponseBody;
 import com.upendra.service.AuthService;
@@ -39,10 +39,10 @@ public class AuthController {
 	private final BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
 
 	@PostMapping("/login")
-	public ResponseEntity<ResponseBody> login(@Valid @RequestBody AuthRequest authRequest) {
+	public ResponseEntity<ResponseBody> login(@Valid @RequestBody AuthRequestDTO authRequestDTO) {
 				
 		//1. Verify the credentials, throws bad credential exception if not matches
-		User user = authService.verifyCredentials(authRequest.getEmail(), authRequest.getPassword());
+		User user = authService.verifyCredentials(authRequestDTO.getEmail(), authRequestDTO.getPassword());
 		
 		
 		//2. Generate access token
@@ -67,8 +67,8 @@ public class AuthController {
 	}
 	
 	@PostMapping("/refresh")
-	public ResponseEntity<ResponseBody> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
-		RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenRequest.getToken());
+	public ResponseEntity<ResponseBody> refresh(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
+		RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenRequestDTO.getToken());
 		refreshTokenService.verifyRefreshToken(refreshToken);
 
 		// Generate new access and refresh token

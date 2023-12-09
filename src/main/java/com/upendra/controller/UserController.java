@@ -44,6 +44,7 @@ public class UserController {
 	
 	@PostMapping("/user")
 	@Validated(onCreate.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<ResponseBody> create(@Valid @RequestBody UserRequestDTO userDTO){
 		User user = userDTO.convertToUser();
 		userService.create(user);
