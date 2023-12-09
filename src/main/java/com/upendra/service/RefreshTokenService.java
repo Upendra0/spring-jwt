@@ -1,23 +1,19 @@
 package com.upendra.service;
 
-import java.time.Duration;
-import java.time.Instant;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
+import com.upendra.model.RefreshToken;
+import com.upendra.model.User;
+import com.upendra.repository.RefreshTokenRepository;
+import com.upendra.repository.UserRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upendra.model.RefreshToken;
-import com.upendra.repository.RefreshTokenRepository;
-import com.upendra.model.User;
-import com.upendra.repository.UserRepository;
-
-import jakarta.persistence.EntityNotFoundException;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.UUID;
 
 @Service
 public class RefreshTokenService {
@@ -34,10 +30,10 @@ public class RefreshTokenService {
 	public RefreshToken createRefreshToken(String email) {
 		RefreshToken refreshToken = new RefreshToken();
 		refreshToken.setToken(getRandomToken());
-		refreshToken.setUser(userRepository.getByEmail(email));
+		refreshToken.setUser(userRepository.findByEmail(email).orElse(null));
 		refreshToken.setExpiryTime(Instant.now().plus(Duration.ofDays(expiryDurationInDays)));
 		
-		refreshTokenRepository.create(refreshToken);
+		refreshTokenRepository.save(refreshToken);
 		return refreshToken;
 	}
 	
@@ -63,22 +59,15 @@ public class RefreshTokenService {
 		refreshToken.setToken(getRandomToken());
 		refreshToken.setExpiryTime(Instant.now().plus(Duration.ofDays(expiryDurationInDays)));
 
-		Map<String, Object> updatabaleFields = new HashMap<>();
-		updatabaleFields.put("token", refreshToken.getToken());
-		updatabaleFields.put("expiryTime", refreshToken.getExpiryTime());
-
-		refreshTokenRepository.update(updatabaleFields, refreshToken.getId());;
+		refreshTokenRepository.save(refreshToken);
 	}
 
 	@Transactional
 	public void deleteByEmail(String email){
-		User user = userRepository.getByEmail(email);
-		if(user!=null){
-			refreshTokenRepository.deleteByField("user", user);
-		}
-	}
+        userRepository.findByEmail(email).ifPresent(user -> refreshTokenRepository.deleteByUser(user));
+    }
 
-	// Verify that a refresh token is valid by comapring its expiration time.
+	// Verify that a refresh token is valid by comparing its expiration time.
 	public void verifyRefreshToken(RefreshToken refreshToken) {
 		if(Instant.now().isAfter(refreshToken.getExpiryTime())) {
 			throw new BadCredentialsException("Refresh Token Expired");

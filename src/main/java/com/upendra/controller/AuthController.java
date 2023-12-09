@@ -4,6 +4,7 @@ import com.upendra.dto.AuthRequest;
 import com.upendra.response.AuthResponse;
 import com.upendra.dto.RefreshTokenRequest;
 import com.upendra.model.RefreshToken;
+import com.upendra.response.ResponseBody;
 import com.upendra.service.AuthService;
 import com.upendra.service.BlockedTokenCacheService;
 import com.upendra.service.JwtService;
@@ -38,7 +39,7 @@ public class AuthController {
 	private final BearerTokenResolver bearerTokenResolver = new DefaultBearerTokenResolver();
 
 	@PostMapping("/login")
-	public ResponseEntity<AuthResponse> login(@Valid @RequestBody AuthRequest authRequest) {
+	public ResponseEntity<ResponseBody> login(@Valid @RequestBody AuthRequest authRequest) {
 				
 		//1. Verify the credentials, throws bad credential exception if not matches
 		User user = authService.verifyCredentials(authRequest.getEmail(), authRequest.getPassword());
@@ -49,11 +50,11 @@ public class AuthController {
 		
 		//3. Generate refresh token if token is not in database.
 		RefreshToken refreshToken = refreshTokenService.getOrCreateRefreshToken(user);
-		return ResponseEntity.ok(new AuthResponse(accessToken,refreshToken.getToken()));
+		return ResponseEntity.ok(ResponseBody.forGet(new AuthResponse(accessToken,refreshToken.getToken())));
 	}
 	
 	@GetMapping("/logout")
-	public ResponseEntity<?> logout(HttpServletRequest request,Authentication authentication) {
+	public ResponseEntity<ResponseBody> logout(HttpServletRequest request,Authentication authentication) {
 		// delete the refresh token
 		String email = authentication.getName();
 		refreshTokenService.deleteByEmail(email);
@@ -62,11 +63,11 @@ public class AuthController {
 		String accessToken = bearerTokenResolver.resolve(request);
 		blockedTokenCacheService.blockToken(accessToken);
 		
-		return ResponseEntity.ok().build();
+		return ResponseEntity.ok(ResponseBody.forDelete());
 	}
 	
 	@PostMapping("/refresh")
-	public ResponseEntity<AuthResponse> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+	public ResponseEntity<ResponseBody> refresh(@RequestBody RefreshTokenRequest refreshTokenRequest) {
 		RefreshToken refreshToken = refreshTokenService.findByToken(refreshTokenRequest.getToken());
 		refreshTokenService.verifyRefreshToken(refreshToken);
 
@@ -76,6 +77,6 @@ public class AuthController {
 		// Update the token and expiry for refresh token
 		refreshTokenService.updateRefreshToken(refreshToken);
 		
-		return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken.getToken()));
+		return ResponseEntity.ok(ResponseBody.forGet(new AuthResponse(accessToken, refreshToken.getToken())));
 	}
 }

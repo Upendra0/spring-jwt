@@ -62,7 +62,7 @@ public class SecurityConfig {
 					.requestMatchers("/api/v1/auth/logout").authenticated()
 					.requestMatchers("/api/v1/auth/*").permitAll()
 					.requestMatchers(HttpMethod.POST, "/api/v1/user").permitAll()
-						.requestMatchers(HttpMethod.GET, "/ping").permitAll()
+						.requestMatchers(HttpMethod.GET, "/error").permitAll()
 					.anyRequest().authenticated();
 				})
 			.csrf(AbstractHttpConfigurer::disable)

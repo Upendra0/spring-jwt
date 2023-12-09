@@ -1,18 +1,14 @@
 package com.upendra.repository;
 
-import org.springframework.stereotype.Repository;
-
 import com.upendra.model.User;
+import org.springframework.data.repository.ListCrudRepository;
 
-@Repository
-public class UserRepository extends GenericRepository<User, Long> {
+import java.util.Optional;
 
-	public User getByEmail(String email) {
-		return getByField("email", email);		
-	}
+public interface UserRepository extends ListCrudRepository<User, Long> {
+    Optional<User> findByEmail(String email);
 
-	@Override
-	public Class<User> getEntityClass() {
-		return User.class;
-	}
+    boolean existsByEmail(String email);
+
+    void deleteByEmail(String email);
 }

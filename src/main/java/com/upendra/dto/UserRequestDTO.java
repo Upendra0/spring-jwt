@@ -19,7 +19,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @AllArgsConstructor
 @ToString
-@AtLeastOneNotNull(fieldNames = {"firstName", "lastName", "password"}, message = "Atlest one of firstName, lastName, password must be send to update")
+@AtLeastOneNotNull(fieldNames = {"firstName", "lastName", "password"}, message = "At least one of firstName, lastName, password must be send to update")
 public class UserRequestDTO {
 	
 	@Email

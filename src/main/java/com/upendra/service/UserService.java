@@ -1,9 +1,11 @@
 package com.upendra.service;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-
+import com.upendra.model.Role;
+import com.upendra.model.User;
+import com.upendra.repository.RefreshTokenRepository;
+import com.upendra.repository.UserRepository;
+import jakarta.persistence.EntityExistsException;
+import jakarta.persistence.EntityNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,13 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.upendra.model.User;
-import com.upendra.repository.UserRepository;
-import com.upendra.model.RefreshToken;
-import com.upendra.repository.RefreshTokenRepository;
-
-import jakarta.persistence.EntityExistsException;
-import jakarta.persistence.EntityNotFoundException;
+import java.util.Optional;
 
 @Service
 public class UserService {
@@ -31,62 +27,44 @@ public class UserService {
 	@Autowired
 	RefreshTokenRepository refreshTokenRepository;
 
-	Logger logger = LoggerFactory.getLogger(UserService.class);
+	private static final Logger logger = LoggerFactory.getLogger(UserService.class);
 
-	@Transactional
+//	@Transactional
 	public void create(User user) {
 
-		if (userRepository.getByEmail(user.getEmail()) != null)
+		if (userRepository.existsByEmail(user.getEmail()))
 			throw new EntityExistsException("User already Exist with email:" + user.getEmail());
 
 		// Encode the password before saving to db
 		user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-		userRepository.create(user);
+
+		// set default role as User
+		user.setRole(Role.USER);
+		userRepository.save(user);
 	}
 
 	@Transactional(readOnly = true)
 	public Optional<User> readByEmail(String email) {
-		return Optional.ofNullable(userRepository.getByEmail(email));
+		return userRepository.findByEmail(email);
 	}
 
 	@Transactional
 	public void update(User user) {
-		if (userRepository.getByEmail(user.getEmail()) == null)
-			throw new EntityNotFoundException("User not exist in database");
-
-		// Encode the password before saving to db if password field is present.
+		User existingUser = userRepository.findByEmail(user.getEmail())
+				.orElseThrow(()->new EntityNotFoundException("User not found"));
+		// Update the fields
 		if(user.getPassword()!=null)
-			user.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
-
-		Map<String, Object> updatabaleFields = new HashMap<>();
-		if(user.getPassword()!=null)
-			updatabaleFields.put("password", user.getPassword());
+			existingUser.setPassword(bCryptPasswordEncoder.encode(user.getPassword()));
 		if(user.getFirstName()!=null)
-			updatabaleFields.put("firstName", user.getFirstName());
+			existingUser.setFirstName(user.getFirstName());
 		if(user.getLastName()!=null)
-			updatabaleFields.put("lastName", user.getLastName());
-		userRepository.updateByField(updatabaleFields, "email", user.getEmail());
+			existingUser.setLastName(user.getLastName());
+		userRepository.save(existingUser);
 	}
 
 	@Transactional
-	public void delete(Long id) {
-
-		userRepository.delete(id);
-	}
-
-	@Transactional
-	public void deleteByEmail(String email) {
-		User user = userRepository.getByEmail(email);
-		if (user != null) {
-			RefreshToken refreshToken = refreshTokenRepository.findByUser(user);
-			if (refreshToken != null) {
-				refreshTokenRepository.delete(refreshToken.getId());
-			}
-			userRepository.deleteByField("email", email);
-		}
-		else{
-			throw new EntityNotFoundException("User not found");
-		}
+	public void delete(String email) {
+		userRepository.deleteByEmail(email);
 	}
 
 }
