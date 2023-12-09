@@ -98,7 +98,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<mainClass>com.upendra.SpringJwtApplication</mainClass>
+					<mainClass>com.upendra.Main</mainClass>
 					<excludes>
 						<exclude>
 							<groupId>org.projectlombok</groupId>
